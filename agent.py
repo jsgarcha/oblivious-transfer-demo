@@ -29,11 +29,13 @@ class Step2Input(BaseModel):
 #Step 3: Agent sends the inquirer the following n items K-(K+(IRN)+RN[k]-RN[i])+I[i] for i=1,...,n.	
 @app.post("/step3")
 def process_step2(data: Step2Input):
-    step2_value = int(data.step2_value)  #Convert back to int
+    step2_value = int(data.step2_value) #Convert back to int
     responses = []
-    for i in range(len(I)):
-        diff = (step2_value-RN[i])%rsa.n
-        decrypted = rsa.decrypt(diff)
-        response = decrypted + I[i]
+    n = len(I) #n Items.
+    for i in range(n):
+        derived = (step2_value-RN[i])%rsa.n #The agent derives n terms K+(IRN)+RN[k]-RN[i] for i=1,...,n.
+        decrypted = rsa.decrypt(derived) #Then the agent applies the decryption function K- to each of the n terms K+(IRN)+RN[k]-RN[i].
+        response = decrypted + I[i] #And adds I[i] to each corresponding ith outcome of applying the decryption function: K-(K+(IRN)+RN[k]-RN[i])+I[i].
         responses.append(response)
-    return {"responses": responses}
+    return {"responses": responses} #Returns result of step 3.
+#Finally, note also that without knowing IRN, the agent could not know the specific kth item the inquirer is asking.
