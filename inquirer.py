@@ -12,5 +12,5 @@ with st.spinner("Connecting to Agent..."):
         request = requests.get(f"{agent_url}/init")
         init_data_= request.json()
     except Exception as e:
-        st.error(f"Failed to connect to agent: {e}")
+        st.error(f"Failed to connect to agent.")
         st.stop()
