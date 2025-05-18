@@ -1,7 +1,7 @@
 
+#'Crypto' is more secure than native math 'number' or 'random' Python libs.
 from Crypto.Util.number import getPrime, inverse
 from Crypto.Random import get_random_bytes
-#More secure than native 'number' or 'random' Python libs.
  
 class RSA:
     #Generate an N-bit (roughly) public and private key pair.
@@ -10,7 +10,7 @@ class RSA:
         q = getPrime(bit_length//2)
         n = p*q #Modulus. n = p*q, size N.
         phi = (p-1)*(q-1)
-        e = getPrime(bit_length, randfunc=get_random_bytes) # Public exponent e, relatively prime to (p-1)*(q-1).
+        e = getPrime(bit_length, randfunc=get_random_bytes) #Public exponent e, relatively prime to (p-1)*(q-1).
         d = inverse(e, phi)
 
         self.modulus = n
