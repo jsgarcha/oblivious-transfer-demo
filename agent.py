@@ -7,29 +7,32 @@ app = FastAPI()
 
 rsa = RSA(256)
 I = list(range(10)) #Information items
-RN = [get_random_bytes(32) for _ in I] #Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer.	
+RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in I] #Generate random numbers RN[].
 
-#Assume inquirer wants to know the kth information unit I[k].	
-
-class Step2Input(BaseModel):
-    step2_value: str  # Changed from int to str
-    k: int
-
+#Initialization & Step 1:
 @app.get("/init")
 def init():
     return {
+        #Initialization -
         "n": len(I), #Send number of information items to inquirer.
-        "public_key": rsa.public_key,
+        "public_key": rsa.public_key, #Send public key to inquirer.
         "modulus": rsa.modulus,
-        "RN": RN
+        #Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer - 
+        "RN": RN 
     }
 
+#Assume inquirer wants to know the k-th information unit: I[k].	
+class Step2Input(BaseModel):
+    step2_value: str  
+    k: int
+
+#Step 3: Agent sends the inquirer the following n items K-(K+(IRN)+RN[k]-RN[i])+I[i] for i=1,...,n.	
 @app.post("/step3")
 def process_step2(data: Step2Input):
-    step2_val = int(data.step2_value)  # Convert back to int
+    step2_value = int(data.step2_value)  #Convert back to int
     responses = []
     for i in range(len(I)):
-        diff = (step2_val - RN[i]) % rsa.n
+        diff = (step2_value-RN[i])%rsa.n
         decrypted = rsa.decrypt(diff)
         response = decrypted + I[i]
         responses.append(response)
