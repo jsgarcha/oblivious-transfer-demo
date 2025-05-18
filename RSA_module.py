@@ -1,26 +1,33 @@
-
-#'Crypto' is more secure for this application than native math 'number' or 'random' Python libs
+#'Crypto' is more secure for this application as opposed to native 'number' or 'random' Python libs
 from Crypto.Util.number import getPrime, inverse
 from Crypto.Random import get_random_bytes
- 
+from math import gcd
+
+#"Raw" RSA implementation for academic purposes - NOT real-world usage.
 class RSA:
     #Generate an N-bit (roughly) public and private key pair
     def __init__(self, bit_length):
         p = getPrime(bit_length//2)
         q = getPrime(bit_length//2)
-        n = p*q #Modulus. n = p*q, size N
+        while p == q:  #Ensure p != q
+            q = getPrime(bit_length // 2)
+        n = p*q
         phi = (p-1)*(q-1)
-        e = getPrime(bit_length, randfunc=get_random_bytes) #Public exponent e, relatively prime to (p-1)*(q-1)
-        d = inverse(e, phi)
 
-        self.modulus = n
-        self.public_key = e #Public key = (Public exponent = e, modulus = n = p*q)
+        e = 65537  #Public exponent e; 65537 is standard for a number of reasons
+        if gcd(e, phi) != 1: #Fallback: generate a random e < phi that is coprime to phi
+            e = getPrime(bit_length//2)
+            while gcd(e, phi) != 1 or e >= phi:
+                e = getPrime(bit_length//2)
+
+        d = inverse(e, phi) #Private exponent
+
+        self.modulus = n #Modulus
+        self.public_key = e #Public key = (Public exponent = e, modulus = n)
         self.private_key = d #Private key = private exponent = d = inverse(e, phi)
 
-    #encrypt(message) = message^(e%n)
     def encrypt(self, message):
         return pow(message, self.public_key, self.modulus)
 
-    #decrypt(encrypted_message) = encrypted_message^(d%n) 
     def decrypt(self, encrypted_message):
         return pow(encrypted_message, self.private_key, self.modulus)
