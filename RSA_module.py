@@ -19,8 +19,8 @@ class RSA:
 
     #encrypt(self, m) = m^e mod PQ = m.
     def encrypt(self, message):
-        return pow(message, self.e, self.n)
+        return pow(message, self.public_key, self.modulus)
 
     #decrypt(e) = e^d mod PQ = e^private key mod modulus.
     def decrypt(self, encrypted_message):
-        return pow(encrypted_message, self.private_key, self.n)
+        return pow(encrypted_message, self.private_key, self.modulus)
