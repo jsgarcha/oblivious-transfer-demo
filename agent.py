@@ -45,18 +45,18 @@ async def step2(request: Request):
     app.state.step2_value =  step2_data.get("step2_value")
 
 #Step 3: Agent sends Inquirer n items: K-(K+(IRN)+RN[k]-RN[i])+I[i] for i=1,...,n
-@app.post("/step3")
+@app.get("/step3")
 async def step3():
     step2_value = int(app.state.step2_value)
     step3_response = []
 
     for i in range(app.state.total_information_items):
         #Agent derives n terms K+(IRN)+RN[k]-RN[i] for i=1,...,n
-        step3_response[i] = step2_value - app.state.RN[i]
+        step3_response[i] = step2_value-app.state.RN[i]
         #Agent decrypts (using function K-) each of the n terms K+(IRN)+RN[k]-RN[i]
         step3_response[i] = app.state.rsa.decrypt(step3_response[i])
-        #Agent adds I[i] to each corresponding ith outcome of the decryption function: K-(K+(IRN)+RN[k]-RN[i])+I[i]
-        step3_response[i] = step3_response[i] + app.state.information_items[i]
+        #Agent adds I[i] to each corresponding i-th outcome of the decryption function: K-(K+(IRN)+RN[k]-RN[i])+I[i]
+        step3_response[i] = step3_response[i]+app.state.information_items[i]
 
     return {
         "responses": step3_response
