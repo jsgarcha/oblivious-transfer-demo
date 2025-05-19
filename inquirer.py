@@ -18,6 +18,7 @@ step0 = st.sidebar.button("Initialize Agent")
 if "step0" not in st.session_state:
     st.session_state.step0 = False
     st.session_state.step1 = False
+    st.session_state.RN = []
 
 #Step 0
 if step0:
@@ -30,7 +31,7 @@ if step0:
         response = requests.post(f"{agent_url}/step0", json=request)
 
         if response.status_code == 200:
-            st.success("Sent key size, index (k) and message to Agent.")
+            st.success("Sent key size, message, and index to Agent.")
             st.success("✅ Agent initialized!")
 
             step0_data = response.json()
@@ -38,7 +39,7 @@ if step0:
             st.session_state.modulus = step0_data["modulus"]
             st.session_state.n = step0_data["n"]
 
-            st.subheader("Received public key, modulus, and number of information items (n) from Agent.")
+            st.success("Received public key, modulus, and number of information items from Agent.")
             st.session_state.step0 = True
 
     except Exception as e:
@@ -46,5 +47,16 @@ if step0:
 
 #Step 1
 if st.session_state.step0 and not st.session_state.step1:
-    st.button("▶️ Step 1")
-    st.session_state.step1_done = True
+    if st.button("▶️ Step 1"):
+        try:
+            response = requests.get(f"{agent_url}/step1")
+
+            if response.status_code == 200:
+                step1_data = response.json()
+                st.session_state.RN = step1_data["RN"]
+                st.success("Received random numbers (RN[1],...,RN[n]) from Agent.")
+                st.session_state.step1 = True
+
+        except Exception as e:
+            st.error("❌ Failed to contact Agent.")
+            st.error(f"{e}")

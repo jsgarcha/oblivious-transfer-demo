@@ -14,7 +14,7 @@ RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_
 
 @app.post("/step0")
 async def step0(request: Request):
-    global rsa, information_items, RN
+    global rsa, information_items
 
     step0_data = await request.json()
     key_size = step0_data.get("key_size") #Allow user to select key size, rather than default of 256
@@ -29,5 +29,12 @@ async def step0(request: Request):
         "public_key": rsa.public_key, #Send public key to inquirer.
         "modulus": rsa.modulus, #Send modulus to inquirer.
         "n": len(information_items), #(= total_information_items) Send number of information items to inquirer
-        "RN": RN #Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer:
     }
+RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate random numbers RN[].
+
+@app.get("/step1")
+async def step1():
+        global RN
+        return {
+            "RN": RN #Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer:
+        }
