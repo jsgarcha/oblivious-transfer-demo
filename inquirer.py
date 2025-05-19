@@ -25,7 +25,7 @@ inquirer_RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in ran
 st.sidebar.header("Step 0:")
 key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
 message = st.sidebar.text_input("Secret Message")
-index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
+message_index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
 step0 = st.sidebar.button("Initialize Agent")
 
 #Step 0
@@ -34,12 +34,12 @@ if step0:
         request = {
             "key_size": key_size,
             "message": message,
-            "index": index
+            "message_index": message_index
         }
         response = requests.post(f"{agent_url}/step0", json=request)
 
         if response.status_code == 200:
-            st.success(f"Sent key size ({key_size}-bit), message ({message}), and index ({index}) to Agent.")
+            st.success(f"Sent key size ({key_size}-bit), message ({message}), and message index ({message_index}) to Agent.")
             st.success("✅ Agent initialized!")
 
             step0_data = response.json()
@@ -73,3 +73,28 @@ if st.session_state.step0 and not st.session_state.step1:
         except Exception as e:
             st.error("❌ Failed to contact Agent.")
             st.exception({e})
+
+#Step 2: Inquirer sends K+(IRN)+RN[k] to Agent
+if st.session_state.step1 and not st.session_state.step2:
+    if st.button("▶️ Step 2"):
+        #Step 2_1: Encrypt Inquirer's random numbers (IRN)
+        rsa = RSA(public_key=st.session_state.public_key, modulus=st.session_state.modulus)
+        st.session_state.encrypted_IRN = rsa.encrypt(st.session_state.IRN)
+        #Step 2_2: Add Inquirer's random numbers (IRN) to Agent's random numbers
+        st.session_state.step2_value = st.session_state.encrypted_IRN + st.session_state.RN[st.session_state.k]
+        st.write(f"IRN = {st.session_state.IRN}")
+        st.write(f"Encrypted IRN = {st.session_state.encrypted_irn}")
+        st.write(f"Sent to Agent (step2_value) = {st.session_state.step2_value}")      
+        try:
+            response = requests.post(f"{agent_url}/step3", json={
+                    "step2_value": str(st.session_state.step2_value)
+                }).json()
+
+                st.session_state.responses = response["responses"]
+                st.session_state.final_values = [
+                    r - st.session_state.IRN for r in st.session_state.responses
+                ]
+                st.session_state.step2 = True
+            except Exception as e:
+                st.error("❌ Failed to contact Agent.")
+                st.exception({e})
