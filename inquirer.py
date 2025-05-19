@@ -34,7 +34,7 @@ if step0:
             st.success("✅ Agent initialized!")
 
     except Exception as e:
-        st.error(f"❌ Failed to initialize Agent.")
+        st.error("❌ Failed to initialize Agent.")
 
 #Step 1
 if st.session_state.step0 and not st.session_state.step1:
