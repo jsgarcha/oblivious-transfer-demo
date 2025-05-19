@@ -100,6 +100,27 @@ if st.session_state.step == 3:
                 if response.status_code == 200:
                     st.session_state.step3_data = response.json()["responses"]
                     st.info("**Received** `K-(K+(IRN)+RN[k]-RN[i])+I[i]` for `i=1,...,n` from **Agent**.");
+            
+                    st.session_state.step = 4
             except Exception as e:
                 st.error("❌ Failed to contact **Agent**.")
                 st.exception({e})
+
+#Step 4: Inquirer offsets the k-th terms sent by Agent in step 3 with IRN: K-(K+(IRN)+RN[k]-RN[i])+I[i]
+if st.session_state.step == 4:
+        if st.button("▶️ Step 4"):
+            st.session_state.final_values = [value-st.session_state.IRN for value in st.session_state.step3_data]
+
+        df = pd.DataFrame({
+            "Index": list(range(st.session_state.n)),
+            "RN[i]": st.session_state.RN,
+            "Info Item (I[i])": st.session_state.info_items,
+            "Response": st.session_state.responses,
+            "Final Value (R - IRN)": st.session_state.final_values
+        })
+
+        def highlight_row(row):
+            return ['background-color: lightgreen' if row.Index == st.session_state.k else '' for _ in row]
+
+        st.dataframe(df.style.apply(highlight_row, axis=1))
+        st.success(f"✔️ Inquirer retrieved I[{st.session_state.k}] = {st.session_state.final_values[st.session_state.k]}")           

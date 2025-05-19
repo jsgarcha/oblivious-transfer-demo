@@ -62,4 +62,4 @@ async def step3():
     return {
         "responses": step3_response
     }
-    #Note: without knowing IRN, Agent could not know the specific k-th item that Inquirer requested
+#Note: without IRN (Inquirer's random number), Agent could not know the specific k-th item that Inquirer requested
