@@ -2,7 +2,7 @@
 import random
 from fastapi import FastAPI, Request
 from RSA_module import RSA
-from Crypto.Util import get_random_bytes
+from Crypto.Random import get_random_bytes
 
 app = FastAPI()
 
@@ -17,7 +17,7 @@ async def step0(request: Request):
     global rsa, information_items, RN
 
     step0_data = await request.json()
-    key_size = step0_data.get("key_size") #Allow user to select, rather than default
+    key_size = step0_data.get("key_size") #Allow user to select key size, rather than default of 256
     #Receive k from inquirer!
     index = step0_data.get("index") 
     message = step0_data.get("message") #Allow user to input, rather than randomly generated
