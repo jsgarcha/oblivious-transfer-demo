@@ -58,7 +58,7 @@ if st.session_state.step0 and not st.session_state.step1:
             if response.status_code == 200:
                 step1_data = response.json()
                 st.session_state.RN = step1_data["RN"]
-                st.info("Received random numbers (RN[1],...,RN[n]) from Agent.")
+                st.info("Received random numbers (RN[0],...,RN[n-1]) from Agent.")
                 st.write("RN[]:")
                 st.write(st.session_state.RN)
 
