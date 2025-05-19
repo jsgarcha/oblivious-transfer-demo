@@ -20,7 +20,7 @@ st.sidebar.header("Step 0:")
 key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
 message = st.sidebar.text_input("Secret Message")
 message_index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
-step0 = st.sidebar.button("🔄 Initialize **Agent**")
+step_0 = st.sidebar.button("🔄 Initialize **Agent**")
 
 #Session state management of protocol
 if "RN" not in st.session_state: st.session_state.RN = []
@@ -28,7 +28,7 @@ if "IRN" not in st.session_state: st.session_state.IRN = getRandomNBitInteger(32
 if "message_index" not in st.session_state: st.session_state.message_index = message_index
 
 #Step 0
-if st.session_state.step == 0 and step0:
+if st.session_state.step == 0 and step_0:
     try:
         request = {
             "key_size": key_size,
@@ -86,8 +86,20 @@ if st.session_state.step == 2:
                 st.subheader(f"Inquirer's random number (`IRN`) = `{st.session_state.IRN}`", divider=True)
                 st.subheader(f"Encrypted `IRN` = `{st.session_state.encrypted_IRN}`", divider=True)
                 st.success(f"**Sent** `{st.session_state.step2_value}` (`K+(IRN)+RN[k]`) to **Agent**")   
-
                 st.session_state.step = 3
         except Exception as e:
             st.error("❌ Failed to contact **Agent**.")
             st.exception({e})
+
+#Step 3:
+if st.session_state.step == 3:
+        if st.button("▶️ Step 3"):
+            try:
+                response = requests.get(f"{agent_url}/step3")
+                st.session_state.responses = response["responses"]
+                    st.session_state.final_values = [
+                        r - st.session_state.IRN for r in st.session_state.responses
+                    ]
+            except Exception as e:
+                st.error("❌ Failed to contact **Agent**.")
+                st.exception({e})
