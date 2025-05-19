@@ -1,23 +1,22 @@
 #'Crypto' is more secure for this application as opposed to native 'number' or 'random' Python libs
-from Crypto.Util.number import getPrime, inverse
-from Crypto.Random import get_random_bytes
-from math import gcd
+from Crypto.Util.number import getPrime, inverse, GCD
 
-#"Raw" RSA implementation for academic purposes - NOT real-world usage.
+from Crypto.Random import get_random_bytes
+#"Raw" RSA implementation for academic purposes - NOT real-world usage. This is suitable for real-world: https://pycryptodome.readthedocs.io/en/latest/src/public_key/public_key.html
 class RSA:
     #Generate an N-bit (roughly) public and private key pair
     def __init__(self, bit_length):
         p = getPrime(bit_length//2)
         q = getPrime(bit_length//2)
-        while p == q:  #Ensure p != q
-            q = getPrime(bit_length // 2)
+        while p == q: #Ensure p != q
+            q = getPrime(bit_length//2)
         n = p*q
         phi = (p-1)*(q-1)
 
-        e = 65537  #Public exponent e; 65537 is standard for a number of reasons
-        if gcd(e, phi) != 1: #Fallback: generate a random e < phi that is coprime to phi
+        e = 65537  #Public exponent e; 65537 is standard for a number of reasons, mostly because it is likely to be coprime (share no common factors except 1) to phi
+        if GCD(e, phi) != 1: #Fallback: generate a random e < phi that is coprime to phi
             e = getPrime(bit_length//2)
-            while gcd(e, phi) != 1 or e >= phi:
+            while GCD(e, phi) != 1 or e >= phi:
                 e = getPrime(bit_length//2)
 
         d = inverse(e, phi) #Private exponent
