@@ -52,11 +52,12 @@ async def step3():
 
     for i in range(app.state.total_information_items):
         #Agent derives n terms K+(IRN)+RN[k]-RN[i] for i=1,...,n
-        step3_response[i] = step2_value-app.state.RN[i]
+        step3_calculation = step2_value-app.state.RN[i]
         #Agent decrypts (using function K-) each of the n terms K+(IRN)+RN[k]-RN[i]
-        step3_response[i] = app.state.rsa.decrypt(step3_response[i])
+        step3_calculation = app.state.rsa.decrypt(step3_calculation)
         #Agent adds I[i] to each corresponding i-th outcome of the decryption function: K-(K+(IRN)+RN[k]-RN[i])+I[i]
-        step3_response[i] = step3_response[i]+app.state.information_items[i]
+        step3_calculation = step3_calculation+int(app.state.information_items[i])
+        step3_response.append(step3_calculation)
 
     return {
         "responses": step3_response

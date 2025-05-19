@@ -98,20 +98,8 @@ if st.session_state.step == 3:
             try:
                 response = requests.get(f"{agent_url}/step3")
                 if response.status_code == 200:
-                    step3_data = response.json()
-                    st.session_state.responses = response["responses"]
-                    st.session_state.final_values = [
-                        r - st.session_state.IRN for r in st.session_state.responses
-                    ]
-                    		System.out.println("Send K-(K+(IRN)+RN[k]-RN[i])+I[i] for i=1,...,n to inquirer.");
-            except Exception as e:
-                st.error("❌ Failed to contact **Agent**.")
-                st.exception({e})
-
-#Step 4: Inquirer offsets the kth terms sent by the agent in step 3 with IRN: K-(K+(IRN)+RN[k]-RN[i])+I[i]
-if st.session_state.step == 3:
-    if st.button("▶️ Step 3"):
-            try:
+                    st.session_state.step3_data = response.json()["responses"]
+                    st.info("**Received** `K-(K+(IRN)+RN[k]-RN[i])+I[i]` for `i=1,...,n` from **Agent**.");
             except Exception as e:
                 st.error("❌ Failed to contact **Agent**.")
                 st.exception({e})
