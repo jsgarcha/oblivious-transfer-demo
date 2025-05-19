@@ -86,6 +86,8 @@ if st.session_state.step == 2:
                 st.subheader(f"Inquirer's random number (`IRN`) = `{st.session_state.IRN}`", divider=True)
                 st.subheader(f"Encrypted `IRN` = `{st.session_state.encrypted_IRN}`", divider=True)
                 st.success(f"**Sent** `{st.session_state.step2_value}` (`K+(IRN)+RN[k]`) to **Agent**")   
+
+                st.session_state.step = 3
         except Exception as e:
             st.error("❌ Failed to contact **Agent**.")
             st.exception({e})

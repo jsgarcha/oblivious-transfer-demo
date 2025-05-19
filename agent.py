@@ -6,11 +6,11 @@ from Crypto.Random import get_random_bytes
 
 app = FastAPI()
 
-#Initialize globals
-rsa = None
-total_information_items = 10 #n
-information_items = [random.randint(0, 9999) for _ in range(total_information_items)] #Randomly generated information for sake of simulation
-RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate Agent's random numbers, RN[].
+#Initialize globals, but safely
+app.state.rsa = None
+app.state.total_information_items = 10 #n
+app.state.information_items = [random.randint(0, 9999) for _ in range(app.state.total_information_items)] #Randomly generated information for sake of simulation
+app.state.RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(app.state.total_information_items)] #Generate Agent's random numbers, RN[].
 
 #Agent initialization - send/receive initial data
 @app.post("/step0")
@@ -23,13 +23,13 @@ async def step0(request: Request):
     message_index = step0_data.get("message_index") 
     message = step0_data.get("message") #Allow user to input message in addition to randomly generated
 
-    rsa = RSA(key_size) #Generate key pair
-    information_items[message_index] = message #Insert/replace user inputted secret message into randomly generated information 
+    app.state.rsa = RSA(key_size) #Generate key pair
+    app.state.information_items[message_index] = message #Insert/replace user inputted secret message into randomly generated information 
 
     return {
-        "public_key": rsa.public_key, #Send public key to Inquirer
-        "modulus": rsa.modulus, #Send modulus to Inquirer
-        "n": len(information_items), #Send number of information items (=total_information_items) to Inquirer
+        "public_key": app.state.rsa.public_key, #Send public key to Inquirer
+        "modulus": app.state.rsa.modulus, #Send modulus to Inquirer
+        "n": len(app.state.information_items), #Send number of information items (=total_information_items) to Inquirer
     }
 
 #Step 1: Agent sends random numbers RN[1],...,RN[n] to Inquirer
@@ -37,7 +37,7 @@ async def step0(request: Request):
 async def step1():
     global RN
     return {
-        "RN": RN 
+        "RN": app.state.RN 
     }
 
 #Step 2: Agent receives K+(IRN)+RN[k] from Inquirer.
