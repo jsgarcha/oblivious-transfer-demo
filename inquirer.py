@@ -49,7 +49,7 @@ if step0:
             st.session_state.modulus = step0_data["modulus"]
             st.session_state.n = step0_data["n"]
 
-            st.info(f"**Received** public key, modulus, and number of information items ({st.session_state.n}) from **Agent**.")
+            st.info(f"**Received** public key, modulus, and number of information items (`{st.session_state.n}`) from **Agent**.")
             st.session_state.step0 = True
 
     except Exception as e:
@@ -66,9 +66,9 @@ if st.session_state.step0 and not st.session_state.step1:
                 step1_data = response.json()
                 st.session_state.RN = step1_data["RN"]
 
-                st.info("**Received** random numbers (RN[0],...,RN[n-1]) from **Agent**.")
+                st.info("**Received** random numbers (`RN[0],...,RN[n-1]`) from **Agent**.")
 
-                st.subheader("**Agent**'s random numbers (RN[]):")
+                st.subheader("**Agent**'s random numbers (`RN[]`):")
                 st.dataframe(pd.DataFrame(st.session_state.RN, columns=['Agent random number (RN[i])']))
 
                 st.session_state.step1 = True
@@ -87,9 +87,9 @@ if st.session_state.step1 and not st.session_state.step2:
         try:
             response = requests.post(f"{agent_url}/step2", json={"step2_value": str(st.session_state.step2_value)})
             if response.status_code == 200:
-                st.subheader(f"IRN = {st.session_state.IRN}")
-                st.write(f"Encrypted IRN = {st.session_state.encrypted_IRN}")
-                st.write(f"Value sent to Agent (K+(IRN)+RN[k]) = {st.session_state.step2_value}")   
+                st.subheader(f"Inquirer's random number (`IRN`) = {st.session_state.IRN}", divider=True)
+                st.subheader(f"Encrypted `IRN` = {st.session_state.encrypted_IRN}", divider=True)
+                st.success(f"Value sent to **Agent** (`K+(IRN)+RN[k]`) = {st.session_state.step2_value}")   
         except Exception as e:
             st.error("❌ Failed to contact **Agent**.")
             st.exception({e})
