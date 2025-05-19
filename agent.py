@@ -32,9 +32,10 @@ async def step0(request: Request):
     }
 RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate random numbers RN[].
 
+#Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer
 @app.get("/step1")
 async def step1():
-        global RN
-        return {
-            "RN": RN #Step 1: Agent sends random numbers RN[1],...,RN[n] to the inquirer:
-        }
+    global RN
+    return {
+        "RN": RN 
+    }

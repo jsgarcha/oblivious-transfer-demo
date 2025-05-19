@@ -8,17 +8,17 @@ st.title("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator")
 agent_url = "http://localhost:8000"
 total_information_items = 10 #n
 
-st.sidebar.header("Step 0:")
-key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
-message = st.sidebar.text_input("Secret Message")
-index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
-step0 = st.sidebar.button("Initialize Agent")
-
 #Session state management
 if "step0" not in st.session_state:
     st.session_state.step0 = False
     st.session_state.step1 = False
     st.session_state.RN = []
+
+st.sidebar.header("Step 0:")
+key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
+message = st.sidebar.text_input("Secret Message")
+index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
+step0 = st.sidebar.button("Initialize Agent")
 
 #Step 0
 if step0:
@@ -44,6 +44,7 @@ if step0:
 
     except Exception as e:
         st.error("❌ Failed to initialize Agent.")
+        st.error(f"{e}")
 
 #Step 1
 if st.session_state.step0 and not st.session_state.step1:
