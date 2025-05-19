@@ -28,7 +28,8 @@ async def step0(request: Request):
     return {
         "public_key": app.state.rsa.public_key, #Send public key to Inquirer
         "modulus": app.state.rsa.modulus, #Send modulus to Inquirer
-        "n": len(app.state.information_items) #Send number of information items (=total_information_items) to Inquirer
+        "n": len(app.state.information_items), #Send number of information items (=total_information_items) to Inquirer
+        "information_items": app.state.information_items
     }
 
 #Step 1: Agent sends random numbers RN[1],...,RN[n] to Inquirer
