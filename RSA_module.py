@@ -28,8 +28,8 @@ class RSA:
             self.public_key = e #Public key = (Public exponent = e, modulus = n)
             self.private_key = d #Private key = private exponent = d = inverse(e, phi)
 
-    def encrypt(self, public_key, modulus, message):
-        return pow(message, public_key, modulus)
+    def encrypt(self, message):
+        return pow(message, self.public_key, self.modulus)
 
     def decrypt(self, encrypted_message):
         return pow(encrypted_message, self.private_key, self.modulus)

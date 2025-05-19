@@ -10,7 +10,7 @@ app = FastAPI()
 rsa = None
 total_information_items = 10 #n
 information_items = [random.randint(0, 9999) for _ in range(total_information_items)] #Randomly generated information for sake of simulation
-RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate random numbers RN[].
+RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate Agent's random numbers, RN[].
 
 #Agent initialization - send/receive initial data
 @app.post("/step0")
@@ -41,3 +41,7 @@ async def step1():
     }
 
 #Step 2: Agent receives K+(IRN)+RN[k] from Inquirer.
+@app.post("/step2")
+async def step2(request: Request):
+    step2_data = await request.json()
+    step2_value =  step2_data.get("step2_value")

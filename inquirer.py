@@ -3,30 +3,32 @@ import streamlit as st
 import pandas as pd
 import requests
 from Crypto.Random import get_random_bytes
+from Crypto.Util.number import getRandomNBitInteger
 
 from RSA_module import RSA
 
 st.set_page_config("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator", layout="wide")
-st.title("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator")
+st.title("🔐 RSA based 1-out-of-n Oblivious Transfer Simulator")
+st.header("Inquirer")
 
 agent_url = "http://localhost:8000"
 total_information_items = 10 #n
 
-#Session state management
-if "step0" not in st.session_state:
-    st.session_state.step0 = False
-    st.session_state.step1 = False
-    st.session_state.step2 = False
-
-    st.session_state.RN = []
-
-inquirer_RN = [int.from_bytes(get_random_bytes(4), byteorder="big") for _ in range(total_information_items)] #Generate random numbers RN[].
+#Session state management of steps
+if "step0" not in st.session_state: st.session_state.step0 = False
+if "step1" not in st.session_state: st.session_state.step1 = False
+if "step2" not in st.session_state: st.session_state.step2 = False
 
 st.sidebar.header("Step 0:")
 key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
 message = st.sidebar.text_input("Secret Message")
 message_index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
-step0 = st.sidebar.button("Initialize Agent")
+step0 = st.sidebar.button("🔄 Initialize **Agent**")
+
+#Session state management of protocol
+if "RN" not in st.session_state: st.session_state.RN = []
+if "IRN" not in st.session_state: st.session_state.IRN = getRandomNBitInteger(32) #Generate Inquirer's random number, IRN. Random 32-bit integer.
+if "message_index" not in st.session_state: st.session_state.message_index = message_index
 
 #Step 0
 if step0:
@@ -39,19 +41,19 @@ if step0:
         response = requests.post(f"{agent_url}/step0", json=request)
 
         if response.status_code == 200:
-            st.success(f"Sent key size ({key_size}-bit), message ({message}), and message index ({message_index}) to Agent.")
-            st.success("✅ Agent initialized!")
+            st.success(f"**Sent** key size ({key_size}-bit), message ({message}), and message index ({message_index}) to **Agent**.")
+            st.success("✅ **Agent** initialized!")
 
             step0_data = response.json()
             st.session_state.public_key = step0_data["public_key"]
             st.session_state.modulus = step0_data["modulus"]
             st.session_state.n = step0_data["n"]
 
-            st.info(f"Received public key, modulus, and number of information items ({st.session_state.n}) from Agent.")
+            st.info(f"**Received** public key, modulus, and number of information items ({st.session_state.n}) from **Agent**.")
             st.session_state.step0 = True
 
     except Exception as e:
-        st.error("❌ Failed to initialize Agent.")
+        st.error("❌ Failed to initialize **Agent**.")
         st.exception(e)
 
 #Step 1
@@ -64,37 +66,30 @@ if st.session_state.step0 and not st.session_state.step1:
                 step1_data = response.json()
                 st.session_state.RN = step1_data["RN"]
 
-                st.info("Received random numbers (RN[0],...,RN[n-1]) from Agent.")
+                st.info("**Received** random numbers (RN[0],...,RN[n-1]) from **Agent**.")
 
-                st.subheader("Agent's random numbers (RN[]):")
-                st.dataframe(pd.DataFrame(st.session_state.RN, columns=['Agent Random Number (RN[i])']))
+                st.subheader("**Agent**'s random numbers (RN[]):")
+                st.dataframe(pd.DataFrame(st.session_state.RN, columns=['Agent random number (RN[i])']))
 
                 st.session_state.step1 = True
         except Exception as e:
-            st.error("❌ Failed to contact Agent.")
+            st.error("❌ Failed to contact **Agent**.")
             st.exception({e})
 
 #Step 2: Inquirer sends K+(IRN)+RN[k] to Agent
 if st.session_state.step1 and not st.session_state.step2:
     if st.button("▶️ Step 2"):
-        #Step 2_1: Encrypt Inquirer's random numbers (IRN)
-        rsa = RSA(public_key=st.session_state.public_key, modulus=st.session_state.modulus)
+        #Step 2_1: Encrypt Inquirer's random number (IRN)
+        rsa = RSA(bit_length=key_size, public_key=st.session_state.public_key, modulus=st.session_state.modulus)
         st.session_state.encrypted_IRN = rsa.encrypt(st.session_state.IRN)
         #Step 2_2: Add Inquirer's random numbers (IRN) to Agent's random numbers
-        st.session_state.step2_value = st.session_state.encrypted_IRN + st.session_state.RN[st.session_state.k]
-        st.write(f"IRN = {st.session_state.IRN}")
-        st.write(f"Encrypted IRN = {st.session_state.encrypted_irn}")
-        st.write(f"Sent to Agent (step2_value) = {st.session_state.step2_value}")      
+        st.session_state.step2_value = st.session_state.encrypted_IRN+st.session_state.RN[st.session_state.message_index]  
         try:
-            response = requests.post(f"{agent_url}/step3", json={
-                    "step2_value": str(st.session_state.step2_value)
-                }).json()
-
-                st.session_state.responses = response["responses"]
-                st.session_state.final_values = [
-                    r - st.session_state.IRN for r in st.session_state.responses
-                ]
-                st.session_state.step2 = True
-            except Exception as e:
-                st.error("❌ Failed to contact Agent.")
-                st.exception({e})
+            response = requests.post(f"{agent_url}/step2", json={"step2_value": str(st.session_state.step2_value)})
+            if response.status_code == 200:
+                st.subheader(f"IRN = {st.session_state.IRN}")
+                st.write(f"Encrypted IRN = {st.session_state.encrypted_IRN}")
+                st.write(f"Value sent to Agent (K+(IRN)+RN[k]) = {st.session_state.step2_value}")   
+        except Exception as e:
+            st.error("❌ Failed to contact **Agent**.")
+            st.exception({e})
