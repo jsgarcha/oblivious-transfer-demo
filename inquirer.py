@@ -1,22 +1,25 @@
-# inquirer.py
+#Inquirer (receiver/client)
 import streamlit as st
 import requests
-import random
+
+st.set_page_config("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator", layout="wide")
+st.title("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator")
 
 agent_url = "http://localhost:8000"
-
-total_information_items = 10
-
-st.title("🔐 Inquirer - RSA based 1-out-of-n Oblivious Transfer Simulator")
+total_information_items = 10 #n
 
 st.sidebar.header("Step 0:")
 key_size = st.sidebar.selectbox("Key Size (bits)", [256, 512, 1024])
 message = st.sidebar.text_input("Secret Message")
-index = st.sidebar.selectbox("Index (k)", options=list(range(10)))
-
+index = st.sidebar.selectbox("Index (k)", options=list(range(total_information_items)))
 step0 = st.sidebar.button("Initialize Agent")
 
-# Step 0
+#Session state management
+if "step0" not in st.session_state:
+    st.session_state.step0 = False
+    st.session_state.step1 = False
+
+#Step 0
 if step0:
     try:
         request = {
@@ -27,9 +30,12 @@ if step0:
         response = requests.post(f"{agent_url}/step0", json=request)
 
         if response.status_code == 200:
+            st.session_state.step0 = True
             st.success("✅ Agent initialized!")
-        
-        
+
     except Exception as e:
         st.error(f"❌ Failed to initialize Agent.")
 
+#Step 1
+if st.session_state.step0 and not st.session_state.step1:
+    st.button("▶️ Step 1: Generate IRN and Encrypt")
