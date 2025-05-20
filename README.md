@@ -10,7 +10,7 @@ Make sure you have Python version >= `3.12.10`
 2) `cd oblivious-transfer-simulator`
 3) `pip install -r requirements.txt`
 4) `fastapi run agent.py`
-5) `streamlit run inquirer.py`
+5) In another terminal: `streamlit run inquirer.py`
 
 ## Overview:
 1) `Agent` is initialized with random information. 
