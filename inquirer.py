@@ -27,17 +27,18 @@ if "modulus" not in st.session_state:           st.session_state.modulus = None
 if "n" not in st.session_state:                 st.session_state.n = None
 if "information_items" not in st.session_state: st.session_state.information_items = [] #For displaying in demonstration; should not really know all these
 if "RN" not in st.session_state:                st.session_state.RN = []
-if "message_index" not in st.session_state:     st.session_state.message_index = message_index
+if "message_index" not in st.session_state:     st.session_state.message_index = None
 if "IRN" not in st.session_state:               st.session_state.IRN = getRandomNBitInteger(32) #Generate Inquirer's random number (IRN); random 32-bit integer
 if "step3_data" not in st.session_state:        st.session_state.step3_data = []
 
 #Step 0 (initialization):
 if st.session_state.step == 0 and step_0:
+    st.session_state.message_index = message_index
     try:
         request = {
             "key_size": key_size,
             "message": message,
-            "message_index": message_index
+            "message_index": st.session_state.message_index
         }
         response = requests.post(f"{agent_url}/step0", json=request)
 
@@ -49,6 +50,7 @@ if st.session_state.step == 0 and step_0:
             st.session_state.public_key = step0_data["public_key"]
             st.session_state.modulus = step0_data["modulus"]
             st.session_state.n = step0_data["n"]
+            st.session_state.information_items = step0_data["information_items"] #Sake of demonstration in final step
 
             st.info(f"**Received** public key, modulus, and number of information items (`{st.session_state.n}`) from **Agent**")
 
@@ -110,3 +112,22 @@ if st.session_state.step == 3:
             except Exception as e:
                 st.error("❌ Failed to contact **Agent**")
                 st.exception({e})
+
+#Step 4: Inquirer offsets the k-th terms sent by Agent in previous step with IRN: K-(K+(IRN)+RN[k]-RN[i])+I[i]
+if st.session_state.step == 4:
+        if st.button("▶️ Step 4"):
+            st.session_state.final_values = [int(value)-st.session_state.IRN for value in st.session_state.step3_data]
+
+            df = pd.DataFrame({
+                "Index": list(range(st.session_state.n)),
+                "RN[i]": st.session_state.RN,
+                "Information Item (I[i])": st.session_state.information_items,
+                "Response": [str(x) for x in st.session_state.step3_data],
+                "Final Value (R - IRN)": [str(x) for x in st.session_state.final_values]
+            })
+
+            def highlight_row(row):
+                return ['background-color: lightgreen' if row.Index == st.session_state.message_index else '' for _ in row]
+
+            st.dataframe(df.style.apply(highlight_row, axis=1))
+            st.success(f"✔️ **Inquirer received** `I[{st.session_state.message_index}] = {st.session_state.final_values[st.session_state.message_index]}` from **Agent**")

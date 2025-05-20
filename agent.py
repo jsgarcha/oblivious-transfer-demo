@@ -43,7 +43,7 @@ async def step1():
 @app.post("/step2")
 async def step2(request: Request):
     step2_data = await request.json()
-    app.state.step2_value =  step2_data.get("step2_value")
+    app.state.step2_value = step2_data.get("step2_value")
 
 #Step 3: Agent sends Inquirer n items: K-(K+(IRN)+RN[k]-RN[i])+I[i] for i=1,...,n
 @app.get("/step3")
