@@ -118,10 +118,11 @@ if st.session_state.step == 4:
         if st.button("▶️ Step 4"):
             st.session_state.final_values = [int(value)-st.session_state.IRN for value in st.session_state.step3_data]
 
+            #Convert all to str to avoid problems with big int's
             df = pd.DataFrame({
                 "Index": list(range(st.session_state.n)),
-                "RN[i]": st.session_state.RN,
-                "Information Item (I[i])": st.session_state.information_items,
+                "RN[i]": [str(x) for x in st.session_state.RN],
+                "Information Item (I[i])": [str(x) for x in st.session_state.information_items],
                 "Response": [str(x) for x in st.session_state.step3_data],
                 "Final Value (R - IRN)": [str(x) for x in st.session_state.final_values]
             })
