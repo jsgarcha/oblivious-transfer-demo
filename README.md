@@ -1,15 +1,16 @@
 # RSA based 1-out-of-n Oblivious Transfer Simulator
-A simulator of the 1-out-of-n Oblivious Transfer protocol - redone in Python from my own earlier project in [Java](https://github.com/jsgarcha/oblivious-transfer-simulator). As opposed to sockets, this follows a REST API architecture. The front-end is in Streamlit and back-end in FastAPI.
-Beware: the program implements non-standard RSA (for academic purposes), so it is not suited for real-world use! Furthermore, only a numeric message is currently supported as input to simplify encryption/decryption operations.
+A simulator of the 1-out-of-n Oblivious Transfer protocol - redone in Python from my earlier Java [project](https://github.com/jsgarcha/oblivious-transfer-simulator). Instead of sockets, this follows a REST API architecture. The front-end is in Streamlit and back-end in FastAPI.
+Beware: the program implements non-standard RSA (for academic purposes), so it is not suited for real-world use! Though it hints at proper practice by calling functions from [PyCryptodome](https://www.pycryptodome.org/). Furthermore, only a numeric message is currently supported as input to simplify encryption/decryption operations.
 
 ## Usage:
-This simulator lets the user select or input a few pieces of data and walk through each step of the 1-out-of-n Oblivious Transfer protocol. At each step, the results, which are generally hidden behind the scenes, are visually printed and displayed, to teach the user how the protocol works. 
+This simulator allows the user to select/input some pieces of data and step through the 1-out-of-n Oblivious Transfer protocol's execution, from start to end. At each step, the actions of `Agent` and `Inquirer` and their results, generally hidden behind the scenes, are displayed; run the simulator again by refreshing the page and selecting/inputting different data. Ultimately, the goal of this visual demonstration is to teach the user how Oblivious Transfer works.
 
 ## Overview:
 1) `Agent` is initialized with random information. 
-2) `Inquirer` is initialized with a random `k` (index of the information item it desires). 
-3) `Agent` listens for `Inquirer`. 
-4) Once `Inquirer` connects to the `Agent`, 1-out-of-n Oblivious Transfer begins. 
-5) The protocol ends with `Inquirer` receiving the `k`th information item from the `Agent`.
+2)  User's secret message is sent to `Agent`
+3) `Inquirer` is initialized with a random `k` (index of the information item it desires). 
+4) `Agent` listens for `Inquirer`. 
+5) Once `Inquirer` connects to the `Agent`, 1-out-of-n Oblivious Transfer begins. 
+6) The protocol ends with `Inquirer` receiving the `k`th information item from the `Agent`.
 
 For a more thorough overview of the mathematical steps involved in the protocol, please refer to my comments in the code.
